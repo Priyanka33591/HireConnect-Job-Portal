@@ -1,0 +1,46 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/auth_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: root
+    password: 
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 
+            client-secret: 
+            scope: openid,email,profile
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          google:
+            issuer-uri: https://accounts.google.com
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  level:
+    org.springframework.security: INFO
+
+hireconnect:
+  jwt:
+    issuer: hireconnect
+    secret: 
+    access-token-minutes: 15
+    refresh-token-days: 7
+  frontend-url: http://localhost:5173
