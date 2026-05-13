@@ -1,0 +1,169 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            add-to-simple-url-handler-mapping: true
+            corsConfigurations:
+              "[/**]":
+                allowedOrigins:
+                  - "http://localhost:5173"
+                  - "http://localhost:80"
+                  - "http://localhost"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders:
+                  - "*"
+                exposedHeaders:
+                  - "*"
+                allowCredentials: true
+                maxAge: 3600
+          routes:
+            - id: auth-docs
+              uri: lb://auth-service
+              predicates:
+                - Path=/api/auth/v3/api-docs
+              filters:
+                - RewritePath=/api/auth/v3/api-docs, /v3/api-docs
+
+            - id: job-docs
+              uri: lb://job-service
+              predicates:
+                - Path=/api/jobs/v3/api-docs
+              filters:
+                - RewritePath=/api/jobs/v3/api-docs, /v3/api-docs
+
+            - id: profile-docs
+              uri: lb://profile-service
+              predicates:
+                - Path=/api/profile/v3/api-docs,/api/profiles/v3/api-docs
+              filters:
+                - RewritePath=/api/profile(s)?/v3/api-docs, /v3/api-docs
+
+            - id: application-docs
+              uri: lb://application-service
+              predicates:
+                - Path=/api/applications/v3/api-docs
+              filters:
+                - RewritePath=/api/applications/v3/api-docs, /v3/api-docs
+
+            - id: interview-docs
+              uri: lb://interview-service
+              predicates:
+                - Path=/api/interviews/v3/api-docs
+              filters:
+                - RewritePath=/api/interviews/v3/api-docs, /v3/api-docs
+
+            - id: subscription-docs
+              uri: lb://subscription-service
+              predicates:
+                - Path=/api/subscriptions/v3/api-docs
+              filters:
+                - RewritePath=/api/subscriptions/v3/api-docs, /v3/api-docs
+
+            - id: auth-service
+              uri: lb://auth-service
+              predicates:
+                - Path=/api/auth/**
+              filters:
+                - StripPrefix=1
+
+            - id: job-service
+              uri: lb://job-service
+              predicates:
+                - Path=/api/jobs/**
+              filters:
+                - StripPrefix=1
+
+            - id: profile-service
+              uri: lb://profile-service
+              predicates:
+                - Path=/api/profile/**,/api/profiles/**
+              filters:
+                - StripPrefix=1
+
+            - id: application-service
+              uri: lb://application-service
+              predicates:
+                - Path=/api/applications/**
+              filters:
+                - StripPrefix=1
+
+            - id: interview-service
+              uri: lb://interview-service
+              predicates:
+                - Path=/api/interviews/**
+              filters:
+                - StripPrefix=1
+
+            - id: notification-service
+              uri: lb://notification-service
+              predicates:
+                - Path=/api/notifications/**
+              filters:
+                - StripPrefix=1
+
+            - id: subscription-service
+              uri: lb://subscription-service
+              predicates:
+                - Path=/api/subscriptions/**,/api/invoices/**
+              filters:
+                - StripPrefix=1
+
+            - id: analytics-service
+              uri: lb://analytics-service
+              predicates:
+                - Path=/api/analytics/**
+              filters:
+                - StripPrefix=1
+
+            - id: profile-uploads
+              uri: lb://profile-service
+              predicates:
+                - Path=/api/uploads/**
+              filters:
+                - StripPrefix=1
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    use-root-path: true
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - name: Auth Service
+        url: /api/auth/v3/api-docs
+      - name: Job Service
+        url: /api/jobs/v3/api-docs
+      - name: Profile Service
+        url: /api/profile/v3/api-docs
+      - name: Application Service
+        url: /api/applications/v3/api-docs
+      - name: Interview Service
+        url: /api/interviews/v3/api-docs
+      - name: Subscription Service
+        url: /api/subscriptions/v3/api-docs
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+
+hireconnect:
+  auth:
+    base-url: ${AUTH_URL:http://localhost:8081}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+
+

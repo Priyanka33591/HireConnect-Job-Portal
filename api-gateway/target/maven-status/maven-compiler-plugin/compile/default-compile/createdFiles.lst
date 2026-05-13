@@ -1,0 +1,10 @@
+com\hireconnect\gateway\ApiGatewayApplication.class
+com\hireconnect\gateway\filter\RequestResponseLoggingFilter.class
+com\hireconnect\gateway\auth\AuthWebClient.class
+com\hireconnect\gateway\auth\TokenValidateResponse.class
+com\hireconnect\gateway\auth\AuthProperties.class
+com\hireconnect\gateway\auth\TokenValidateRequest.class
+com\hireconnect\gateway\filter\JwtAuthGlobalFilter.class
+com\hireconnect\gateway\filter\GatewayErrorResponse$GatewayErrorResponseBuilder.class
+com\hireconnect\gateway\filter\GatewayErrorResponse.class
+com\hireconnect\gateway\config\AppConfig.class
