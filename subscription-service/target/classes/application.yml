@@ -23,7 +23,7 @@ hireconnect:
   auth:
     base-url: ${AUTH_URL:http://localhost:8081}
   razorpay:
-    key-id: rzp_live_SjbEXw1PfBHkYc
-    key-secret: gYE74lEVJErpreUPCNb5AHC7
+    key-id: 
+    key-secret: 
 
 
