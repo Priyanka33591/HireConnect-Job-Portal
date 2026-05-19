@@ -877,25 +877,43 @@ HireConnect integrates **RabbitMQ** to decouple long-running operations—specif
     2.  The API request returns a `201 Created` status to the recruiter in milliseconds.
     3.  `notification-service` acts as an independent consumer, listening to the message queue and processing the notification pipeline in the background.
 
-```mermaid
 graph TD
-    subgraph Interview Service (Producer)
-        Sched[Recruiter schedules interview] -->|Persist Interview| DB_Int[(interview_db)]
-        Sched -->|Build Event payload| Event[InterviewEvent DTO]
-        Event -->|RabbitTemplate.convertAndSend| Exchange[Topic Exchange: interview.exchange]
+
+    subgraph "Interview Service - Producer"
+
+        Sched["Recruiter Schedules Interview"]
+            -->|Persist Interview| DB_Int[("interview_db")]
+
+        Sched
+            -->|Build Event Payload| Event["InterviewEvent DTO"]
+
+        Event
+            -->|RabbitTemplate.convertAndSend| Exchange["Topic Exchange<br/>interview.exchange"]
+
     end
 
-    subgraph RabbitMQ Broker
-        Exchange -->|Routing Key: interview.scheduled| Queue[Queue: notification.queue]
+    subgraph "RabbitMQ Broker"
+
+        Exchange
+            -->|Routing Key interview.scheduled| Queue["Queue<br/>notification.queue"]
+
     end
 
-    subgraph Notification Service (Consumer)
-        Queue -->|@RabbitListener| Consumer[EventConsumer]
-        Consumer -->|Process & Format Message| Notif[Notification DTO]
-        Notif -->|Persist Record| DB_Notif[(notification_db)]
-        Notif -->|WebSocket SimpTemplate| Push[Push to Browser Topic]
+    subgraph "Notification Service - Consumer"
+
+        Queue
+            -->|@RabbitListener| Consumer["EventConsumer"]
+
+        Consumer
+            -->|Process and Format Message| Notif["Notification DTO"]
+
+        Notif
+            -->|Persist Record| DB_Notif[("notification_db")]
+
+        Notif
+            -->|WebSocket SimpTemplate| Push["Push to Browser Topic"]
+
     end
-```
 
 ---
 
