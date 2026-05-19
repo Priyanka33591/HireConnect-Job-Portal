@@ -800,7 +800,7 @@ HireConnect implements a highly secure, stateless authentication and authorizati
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Client as Browser
+    participant Client as Browser
     participant Gateway as API Gateway (Global Filter)
     participant Auth as Auth Service (JwtService)
     participant Downstream as Downstream (BearerAuthFilter)
@@ -871,17 +871,17 @@ HireConnect integrates **RabbitMQ** to decouple long-running operations—specif
 
 ```mermaid
 graph TD
-    subgraph Interview Service (Producer)
+    subgraph InterviewService ["Interview Service (Producer)"]
         Sched[Recruiter schedules interview] -->|Persist Interview| DB_Int[(interview_db)]
         Sched -->|Build Event payload| Event[InterviewEvent DTO]
         Event -->|RabbitTemplate.convertAndSend| Exchange[Topic Exchange: interview.exchange]
     end
 
-    subgraph RabbitMQ Broker
+    subgraph RabbitMQBroker ["RabbitMQ Broker"]
         Exchange -->|Routing Key: interview.scheduled| Queue[Queue: notification.queue]
     end
 
-    subgraph Notification Service (Consumer)
+    subgraph NotificationService ["Notification Service (Consumer)"]
         Queue -->|@RabbitListener| Consumer[EventConsumer]
         Consumer -->|Process & Format Message| Notif[Notification DTO]
         Notif -->|Persist Record| DB_Notif[(notification_db)]
@@ -1007,7 +1007,7 @@ Below are the end-to-end execution pathways for critical system operations:
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User as Client UI
+    participant User as Client UI
     participant Gateway as API Gateway
     participant Auth as Auth Service
     participant Profile as Profile Service
@@ -1036,7 +1036,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Recruiter as Recruiter UI
+    participant Recruiter as Recruiter UI
     participant Gateway as API Gateway
     participant Job as Job Service
     participant Sub as Subscription Service
@@ -1050,7 +1050,7 @@ sequenceDiagram
     Sub-->>Job: Return Plan (Limit = 10 posts)
     Job->>DB: COUNT(jobs) posted this month
     DB-->>Job: Returns active count = 10
-    Note over Job: Active count (10) >= Limit (10) -> Throws limit exceeded exception
+    Note over Job: Active count (10) >= Limit (10) therefore Throws limit exceeded exception
     Job-->>Gateway: 400 Bad Request ("your free trail is over you have to but a plan")
     Gateway-->>Recruiter: Render Subscription Upgrade modal
 ```
@@ -1062,12 +1062,12 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Recruiter as Recruiter UI
+    participant Recruiter as Recruiter UI
     participant Gateway as API Gateway
     participant Int as Interview Service
     participant Rabbit as RabbitMQ
     participant Notif as Notification Service
-    actor Candidate as Candidate UI
+    participant Candidate as Candidate UI
 
     Recruiter->>Gateway: POST /api/interviews (details, appId, candidateId)
     Gateway->>Int: Forward schedule request
@@ -1105,21 +1105,21 @@ The React application is compiled using Vite's production bundler (`npm run buil
 
 ```mermaid
 graph TD
-    subgraph Host OS Environment
+    subgraph Host_OS ["Host OS Environment"]
         Port_80[Public HTTP Port: 80]
         Port_8080[Gateway API Port: 8080]
         Port_8761[Eureka Dashboard Port: 8761]
     end
 
-    subgraph Docker Bridge Network: hc-network
+    subgraph Docker_Bridge ["Docker Bridge Network: hc-network"]
         Nginx[Frontend Container - Nginx]
-        Gateway[API Gateway Container]
+        GatewayContainer[API Gateway Container]
         Eureka[Eureka Registry Container]
         
-        subgraph Decoupled Microservices
+        subgraph Decoupled_Microservices ["Decoupled Microservices"]
             Auth[Auth Service]
             Profile[Profile Service]
-            Job[Job Service]
+            JobService[Job Service]
             App[Application Service]
             Int[Interview Service]
             Notif[Notification Service]
@@ -1133,17 +1133,24 @@ graph TD
 
     %% Mapping Host Ports
     Port_80 --- Nginx
-    Port_8080 --- Gateway
+    Port_8080 --- GatewayContainer
     Port_8761 --- Eureka
 
     %% Internal routing
-    Nginx -->|Proxy API calls| Gateway
-    Gateway -->|Route queries| Eureka
-    Gateway -->|Forward traffic| Decoupled Microservices
+    Nginx -->|Proxy API calls| GatewayContainer
+    GatewayContainer -->|Route queries| Eureka
+    GatewayContainer -->|Forward traffic| Auth
+    GatewayContainer -->|Forward traffic| Profile
+    GatewayContainer -->|Forward traffic| JobService
+    GatewayContainer -->|Forward traffic| App
+    GatewayContainer -->|Forward traffic| Int
+    GatewayContainer -->|Forward traffic| Notif
+    GatewayContainer -->|Forward traffic| Sub
+    GatewayContainer -->|Forward traffic| Analytics
     
     %% Infrastructure access
     Auth -->|Cache| Redis
-    Job -->|Cache| Redis
+    JobService -->|Cache| Redis
     Int -->|Publish| Rabbit
     Notif -->|Consume| Rabbit
 ```
