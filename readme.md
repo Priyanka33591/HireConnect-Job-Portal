@@ -564,7 +564,7 @@ sequenceDiagram
     4. Aggregates conversion indicators (Applications -> Hired rates).
     5. Returns unified analytics DTO.
 
-```mermaid
+
 graph TD
 
     Client["Admin Dashboard"]
