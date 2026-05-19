@@ -483,10 +483,10 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-    Rabbit[RabbitMQ QUEUE: notification.queue] -->|1. Consume Event| Consumer[EventConsumer]
-    Consumer -->|2. Save DB| Repo[NotificationRepository]
-    Consumer -->|3. WS Push| Simp[SimpMessagingTemplate]
-    Simp -->|4. Push to /topic/notifications/{userId}| Browser[Candidate UI Browser]
+    Rabbit["RabbitMQ QUEUE: notification.queue"] -->|"1. Consume Event"| Consumer["EventConsumer"]
+    Consumer -->|"2. Save DB"| Repo["NotificationRepository"]
+    Consumer -->|"3. WS Push"| Simp["SimpMessagingTemplate"]
+    Simp -->|"4. Push to /topic/notifications/{userId}"| Browser["Candidate UI Browser"]
 ```
 
 ---
@@ -872,21 +872,31 @@ HireConnect integrates **RabbitMQ** to decouple long-running operations—specif
 ```mermaid
 graph TD
     subgraph InterviewService ["Interview Service (Producer)"]
-        Sched[Recruiter schedules interview] -->|Persist Interview| DB_Int[(interview_db)]
-        Sched -->|Build Event payload| Event[InterviewEvent DTO]
-        Event -->|RabbitTemplate.convertAndSend| Exchange[Topic Exchange: interview.exchange]
+        Sched["Recruiter schedules interview"]
+        DB_Int[("interview_db")]
+        Event["InterviewEvent DTO"]
     end
 
     subgraph RabbitMQBroker ["RabbitMQ Broker"]
-        Exchange -->|Routing Key: interview.scheduled| Queue[Queue: notification.queue]
+        Exchange["Topic Exchange: interview.exchange"]
+        Queue["Queue: notification.queue"]
     end
 
     subgraph NotificationService ["Notification Service (Consumer)"]
-        Queue -->|@RabbitListener| Consumer[EventConsumer]
-        Consumer -->|Process & Format Message| Notif[Notification DTO]
-        Notif -->|Persist Record| DB_Notif[(notification_db)]
-        Notif -->|WebSocket SimpTemplate| Push[Push to Browser Topic]
+        Consumer["EventConsumer"]
+        Notif["Notification DTO"]
+        DB_Notif[("notification_db")]
+        Push["Push to Browser Topic"]
     end
+
+    Sched -->|"Persist Interview"| DB_Int
+    Sched -->|"Build Event payload"| Event
+    Event -->|"RabbitTemplate.convertAndSend"| Exchange
+    Exchange -->|"Routing Key: interview.scheduled"| Queue
+    Queue -->|"@RabbitListener"| Consumer
+    Consumer -->|"Process & Format Message"| Notif
+    Notif -->|"Persist Record"| DB_Notif
+    Notif -->|"WebSocket SimpTemplate"| Push
 ```
 
 ---
