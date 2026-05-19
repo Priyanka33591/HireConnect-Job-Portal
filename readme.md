@@ -566,16 +566,20 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-    Client[Admin Dashboard] -->|GET /analytics/admin| Analytics[Analytics Service]
-    par Aggregate Data
-        Analytics -->|GET /auth/users| Auth[Auth Service]
-        Analytics -->|GET /jobs| Job[Job Service]
-        Analytics -->|GET /applications| App[Application Service]
-        Analytics -->|GET /invoices/admin/all| Sub[Subscription Service]
+
+    Client["Admin Dashboard"]
+        -->|GET /analytics/admin| Analytics["Analytics Service"]
+
+    subgraph "Aggregate Data"
+        Analytics -->|GET /auth/users| Auth["Auth Service"]
+        Analytics -->|GET /jobs| Job["Job Service"]
+        Analytics -->|GET /applications| App["Application Service"]
+        Analytics -->|GET /invoices/admin/all| Sub["Subscription Service"]
     end
-    Analytics -->|Compute Statistics & Growth| Analytics
-    Analytics -->>Client: Return AdminAnalyticsResponse DTO
-```
+
+    Analytics -->|Compute Statistics and Growth| Analytics
+
+    Analytics -.->|Return AdminAnalyticsResponse DTO| Client
 
 ---
 
