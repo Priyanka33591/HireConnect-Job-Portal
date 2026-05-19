@@ -90,7 +90,6 @@ graph TD
         Job -->|Cache Jobs| Redis
     end
 ```
-
 ---
 
 ### 🗺️ Client-Server Architecture Diagram
@@ -484,18 +483,10 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-
-    Rabbit["RabbitMQ Queue<br/>notification.queue"]
-        -->|1. Consume Event| Consumer["EventConsumer"]
-
-    Consumer
-        -->|2. Save DB| Repo["NotificationRepository"]
-
-    Consumer
-        -->|3. WebSocket Push| Simp["SimpMessagingTemplate"]
-
-    Simp
-        -->|4. Push to /topic/notifications/userId| Browser["Candidate UI Browser"]
+    Rabbit[RabbitMQ QUEUE: notification.queue] -->|1. Consume Event| Consumer[EventConsumer]
+    Consumer -->|2. Save DB| Repo[NotificationRepository]
+    Consumer -->|3. WS Push| Simp[SimpMessagingTemplate]
+    Simp -->|4. Push to /topic/notifications/{userId}| Browser[Candidate UI Browser]
 ```
 
 ---
@@ -564,23 +555,24 @@ sequenceDiagram
     4. Aggregates conversion indicators (Applications -> Hired rates).
     5. Returns unified analytics DTO.
 
+```mermaid
+sequenceDiagram
+    participant Client as Admin Dashboard
+    participant Analytics as Analytics Service
+    participant Auth as Auth Service
+    participant Job as Job Service
+    participant App as Application Service
+    participant Sub as Subscription Service
 
-```mermaid id="n4k7xp"
-graph TD
-
-    Client["Admin Dashboard"]
-        -->|GET /analytics/admin| Analytics["Analytics Service"]
-
-    subgraph "Aggregate Data"
-        Analytics -->|GET /auth/users| Auth["Auth Service"]
-        Analytics -->|GET /jobs| Job["Job Service"]
-        Analytics -->|GET /applications| App["Application Service"]
-        Analytics -->|GET /invoices/admin/all| Sub["Subscription Service"]
+    Client->>Analytics: GET /analytics/admin
+    par Aggregate Data
+        Analytics->>Auth: GET /auth/users
+        Analytics->>Job: GET /jobs
+        Analytics->>App: GET /applications
+        Analytics->>Sub: GET /invoices/admin/all
     end
-
-    Analytics -->|Compute Statistics and Growth| Metrics["Metrics Engine"]
-
-    Metrics -.->|Return AdminAnalyticsResponse DTO| Client
+    Analytics->>Analytics: Compute Statistics & Growth
+    Analytics-->>Client: Return AdminAnalyticsResponse DTO
 ```
 
 ---
@@ -877,43 +869,25 @@ HireConnect integrates **RabbitMQ** to decouple long-running operations—specif
     2.  The API request returns a `201 Created` status to the recruiter in milliseconds.
     3.  `notification-service` acts as an independent consumer, listening to the message queue and processing the notification pipeline in the background.
 
+```mermaid
 graph TD
-
-    subgraph "Interview Service - Producer"
-
-        Sched["Recruiter Schedules Interview"]
-            -->|Persist Interview| DB_Int[("interview_db")]
-
-        Sched
-            -->|Build Event Payload| Event["InterviewEvent DTO"]
-
-        Event
-            -->|RabbitTemplate.convertAndSend| Exchange["Topic Exchange<br/>interview.exchange"]
-
+    subgraph Interview Service (Producer)
+        Sched[Recruiter schedules interview] -->|Persist Interview| DB_Int[(interview_db)]
+        Sched -->|Build Event payload| Event[InterviewEvent DTO]
+        Event -->|RabbitTemplate.convertAndSend| Exchange[Topic Exchange: interview.exchange]
     end
 
-    subgraph "RabbitMQ Broker"
-
-        Exchange
-            -->|Routing Key interview.scheduled| Queue["Queue<br/>notification.queue"]
-
+    subgraph RabbitMQ Broker
+        Exchange -->|Routing Key: interview.scheduled| Queue[Queue: notification.queue]
     end
 
-    subgraph "Notification Service - Consumer"
-
-        Queue
-            -->|@RabbitListener| Consumer["EventConsumer"]
-
-        Consumer
-            -->|Process and Format Message| Notif["Notification DTO"]
-
-        Notif
-            -->|Persist Record| DB_Notif[("notification_db")]
-
-        Notif
-            -->|WebSocket SimpTemplate| Push["Push to Browser Topic"]
-
+    subgraph Notification Service (Consumer)
+        Queue -->|@RabbitListener| Consumer[EventConsumer]
+        Consumer -->|Process & Format Message| Notif[Notification DTO]
+        Notif -->|Persist Record| DB_Notif[(notification_db)]
+        Notif -->|WebSocket SimpTemplate| Push[Push to Browser Topic]
     end
+```
 
 ---
 
