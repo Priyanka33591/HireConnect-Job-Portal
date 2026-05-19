@@ -565,6 +565,7 @@ sequenceDiagram
     5. Returns unified analytics DTO.
 
 
+```mermaid id="n4k7xp"
 graph TD
 
     Client["Admin Dashboard"]
@@ -577,9 +578,10 @@ graph TD
         Analytics -->|GET /invoices/admin/all| Sub["Subscription Service"]
     end
 
-    Analytics -->|Compute Statistics and Growth| Analytics
+    Analytics -->|Compute Statistics and Growth| Metrics["Metrics Engine"]
 
-    Analytics -.->|Return AdminAnalyticsResponse DTO| Client 
+    Metrics -.->|Return AdminAnalyticsResponse DTO| Client
+```
 
 ---
 
