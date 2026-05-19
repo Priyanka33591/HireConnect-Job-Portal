@@ -484,10 +484,18 @@ sequenceDiagram
 
 ```mermaid
 graph TD
-    Rabbit[RabbitMQ QUEUE: notification.queue] -->|1. Consume Event| Consumer[EventConsumer]
-    Consumer -->|2. Save DB| Repo[NotificationRepository]
-    Consumer -->|3. WS Push| Simp[SimpMessagingTemplate]
-    Simp -->|4. Push to /topic/notifications/{userId}| Browser[Candidate UI Browser]
+
+    Rabbit["RabbitMQ Queue<br/>notification.queue"]
+        -->|1. Consume Event| Consumer["EventConsumer"]
+
+    Consumer
+        -->|2. Save DB| Repo["NotificationRepository"]
+
+    Consumer
+        -->|3. WebSocket Push| Simp["SimpMessagingTemplate"]
+
+    Simp
+        -->|4. Push to /topic/notifications/userId| Browser["Candidate UI Browser"]
 ```
 
 ---
