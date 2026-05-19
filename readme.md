@@ -579,7 +579,7 @@ graph TD
 
     Analytics -->|Compute Statistics and Growth| Analytics
 
-    Analytics -.->|Return AdminAnalyticsResponse DTO| Client
+    Analytics -.->|Return AdminAnalyticsResponse DTO| Client 
 
 ---
 
