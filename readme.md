@@ -1,4 +1,4 @@
-a# 🚀 HIRECONNECT: TECHNICAL ARCHITECTURE & SYSTEMS ENGINEERING DOCUMENTATION
+# 🚀 HIRECONNECT: TECHNICAL ARCHITECTURE & SYSTEMS ENGINEERING DOCUMENTATION
 
 **HireConnect** is a state-of-the-art, enterprise-grade job portal engineered on a highly-performant, secure, and resilient **Microservices Architecture**. It facilitates a seamless, real-time ecosystem for **Candidates**, **Recruiters**, and **Platform Administrators** to manage careers, orchestrate professional placements, and oversee platform scaling metrics.
 
