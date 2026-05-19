@@ -66,25 +66,27 @@ The user interacts with a responsive React (Vite-powered) single-page applicatio
 ### 🗺️ High-Level Architecture Diagram
 ```mermaid
 graph TD
-    Client[React Frontend - Port 80/5173] -->|API Requests| Gateway[API Gateway - Port 8080]
+
+    Client["React Frontend<br/>Port 80/5173"] -->|API Requests| Gateway["API Gateway<br/>Port 8080"]
     Client -->|WebSocket /ws-notifications| Gateway
-    
-    Gateway -->|JWT Validate| Auth[Auth Service - Port 8081]
-    
-    subgraph Service Mesh (Dynamic Routing via Eureka Server - Port 8761)
-        Gateway -->|Route| Profile[Profile Service - Port 8082]
-        Gateway -->|Route| Job[Job Service - Port 8083]
-        Gateway -->|Route| Application[Application Service - Port 8084]
-        Gateway -->|Route| Interview[Interview Service - Port 8085]
-        Gateway -->|Route| Notification[Notification Service - Port 8086]
-        Gateway -->|Route| Subscription[Subscription Service - Port 8087]
-        Gateway -->|Route| Analytics[Analytics Service - Port 8088]
+
+    Gateway -->|JWT Validate| Auth["Auth Service<br/>Port 8081"]
+
+    subgraph "Service Mesh - Dynamic Routing via Eureka Server (Port 8761)"
+        Gateway -->|Route| Profile["Profile Service<br/>Port 8082"]
+        Gateway -->|Route| Job["Job Service<br/>Port 8083"]
+        Gateway -->|Route| Application["Application Service<br/>Port 8084"]
+        Gateway -->|Route| Interview["Interview Service<br/>Port 8085"]
+        Gateway -->|Route| Notification["Notification Service<br/>Port 8086"]
+        Gateway -->|Route| Subscription["Subscription Service<br/>Port 8087"]
+        Gateway -->|Route| Analytics["Analytics Service<br/>Port 8088"]
     end
 
-    subgraph Messaging & Cache
-        Interview -->|Publish Event| Rabbit[RabbitMQ Broker - Port 5672]
+    subgraph "Messaging and Cache"
+        Interview -->|Publish Event| Rabbit["RabbitMQ Broker<br/>Port 5672"]
         Rabbit -->|Consume Event| Notification
-        Auth -->|Read/Write Session| Redis[(Redis Caching - Port 6379)]
+
+        Auth -->|Read/Write Session| Redis["Redis Cache<br/>Port 6379"]
         Job -->|Cache Jobs| Redis
     end
 ```
