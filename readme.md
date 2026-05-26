@@ -211,6 +211,97 @@ flowchart TD
     Analytics -->|Fetch Apps| App
     Analytics -->|Fetch Billing| Sub
 ```
+```mermaid
+flowchart TD
+    subgraph Entry ["🚀 Entry Layer"]
+        Client[Client UI / React]
+        Gateway[API Gateway :8080]
+    end
+
+    subgraph Registry ["🧭 Service Registry"]
+        Eureka[Eureka Server :8761]
+    end
+
+    subgraph Authentication ["🔐 Security Layer"]
+        Auth[Auth Service :8081]
+        MySQL_Auth[(auth_db)]
+        Auth --- MySQL_Auth
+    end
+
+    subgraph Core Features ["💼 Core Business Services"]
+        Job[Job Service :8083]
+        MySQL_Job[(job_db)]
+        Job --- MySQL_Job
+        
+        Profile[Profile Service :8082]
+        MySQL_Prof[(profile_db)]
+        Profile --- MySQL_Prof
+
+        App[Application Service :8084]
+        MySQL_App[(application_db)]
+        App --- MySQL_App
+
+        Sub[Subscription Service :8087]
+        MySQL_Sub[(subscription_db)]
+        Sub --- MySQL_Sub
+    end
+
+    subgraph Decoupled Messaging ["🔔 Asynchronous Events"]
+        Int[Interview Service :8085]
+        MySQL_Int[(interview_db)]
+        Int --- MySQL_Int
+
+        Rabbit{RabbitMQ Broker}
+        Notif[Notification Service :8086]
+        MySQL_Notif[(notification_db)]
+        Notif --- MySQL_Notif
+    end
+
+    subgraph Analytical Layer ["📊 Monitoring"]
+        Analytics[Analytics Service :8088]
+    end
+
+    %% Client and Gateway routing
+    Client -->|HTTP/REST| Gateway
+    Gateway -->|1. Lookup Route| Eureka
+    
+    Gateway -->|2. Forward| Auth
+    Gateway -->|2. Forward| Profile
+    Gateway -->|2. Forward| Job
+    Gateway -->|2. Forward| App
+    Gateway -->|2. Forward| Int
+    Gateway -->|2. Forward| Notif
+    Gateway -->|2. Forward| Sub
+    Gateway -->|2. Forward| Analytics
+
+    %% Eureka Registration (Dotted lines for background process)
+    Auth -.->|Register/Heartbeat| Eureka
+    Profile -.->|Register| Eureka
+    Job -.->|Register| Eureka
+    App -.->|Register| Eureka
+    Int -.->|Register| Eureka
+    Notif -.->|Register| Eureka
+    Sub -.->|Register| Eureka
+    Analytics -.->|Register| Eureka
+
+    %% Service to Service REST communications
+    Job -->|Verify Limit| Sub
+    App -->|Check Sub limit / Fetch job| Job
+    App -->|Fetch profile| Profile
+    Int -->|Fetch Application details| App
+    Int -->|Fetch Recruiter profile| Profile
+    
+    %% Async Messaging
+    Int -->|1. Publish Interview Event| Rabbit
+    Rabbit -->|2. Route to notification.queue| Notif
+    Notif -->|3. Push WebSocket toast| Client
+    
+    %% Analytics Aggregation
+    Analytics -->|Fetch Users| Auth
+    Analytics -->|Fetch Jobs| Job
+    Analytics -->|Fetch Apps| App
+    Analytics -->|Fetch Billing| Sub
+```
 
 ---
 
